@@ -4,12 +4,43 @@ import { Button, Card, Elevation } from "@blueprintjs/core";
 
 function List({ list, toggleComplete, setIncomplete, incomplete }) {
   const settings = useContext(settingContext);
-  const [pagination, setPagination] = useState(settings.numberOfItems);
-  const makePagination = (list, number) => {
+  const [pagination, setPagination] = useState(settings.state.numberOfItems);
+  const renderList = (item) => {
+    return (
+      <Card
+        interactive={true}
+        elevation={Elevation.TWO}
+        key={item.id}
+        style={{
+          width: "100%",
+          maxHeight: "80%",
+          minHeight: "40%",
+          margin: "0.5rem",
+        }}
+      >
+        <div
+          onClick={() => toggleComplete(item.id)}
+          className={`${item.complete ? "Complete" : "notComplete"} isComplete`}
+        >
+          <span>{item.complete ? "Complete" : "pending"}</span>
+        </div>
+        <p className={"assignee"}>{item.assignee}</p>
+        <p className={"task"}>{item.text}</p>
+        <p className="Difficulty">
+          <small>Difficulty: {item.difficulty}</small>
+        </p>
+      </Card>
+    );
+  };
+  const makePagination = (list, number, filtered) => {
     const btn = [];
-    for (let i = 0; i < list.length / number; i++) {
+    let arr = [];
+    if (filtered) arr = list.filter((item) => item.complete === false);
+    else arr = list;
+    for (let i = 0; i < arr.length / number; i++) {
       btn.push(
         <Button
+          key={i}
           onClick={() => {
             setPagination((i + 1) * number);
           }}
@@ -21,39 +52,50 @@ function List({ list, toggleComplete, setIncomplete, incomplete }) {
     return btn;
   };
   useEffect(() => {
-    let incompleteCount = list.filter((item) => !item.complete).length;
-    setIncomplete(incompleteCount);
+    let incompleteCount = list.filter((item) => !item.complete);
+    setIncomplete(incompleteCount.length);
     document.title = `To Do List: ${incomplete}`;
   }, [list]);
-  console.log(list);
+
+  useEffect(() => {
+    setPagination(settings.state.numberOfItems);
+  }, [settings.state.numberOfItems]);
+
   return (
     <div>
-      {list
-        .slice(pagination - settings.numberOfItems, pagination)
-        .map((item) => (
-          <Card interactive={true} elevation={Elevation.TWO} key={item.id}>
-            <div
-              onClick={() => toggleComplete(item.id)}
-              className={`${
-                item.complete ? "Complete" : "notComplete"
-              } isComplete`}
-            >
-              <span>{item.complete ? "Complete" : "pending"}</span>
-            </div>
-            <p className={"assignee"}>{item.assignee}</p>
-            <p className={"task"}>{item.text}</p>
-            <p className="Difficulty">
-              <small>Difficulty: {item.difficulty}</small>
-            </p>
-          </Card>
-        ))}
-      <div>{makePagination(list, settings.numberOfItems)}</div>
+      {settings.state.display
+        ? list
+            .sort(
+              (a, b) =>
+                a[settings.state.defaultSortField] -
+                b[settings.state.defaultSortField]
+            )
+            .slice(pagination - settings.state.numberOfItems, pagination)
+            .map((item) => renderList(item))
+        : list
+            .filter((item) => !item.complete)
+            .sort(
+              (a, b) =>
+                a[settings.state.defaultSortField] -
+                b[settings.state.defaultSortField]
+            )
+            .slice(pagination - settings.state.numberOfItems, pagination)
+            .map((item) => renderList(item))}
+      <div>
+        {makePagination(
+          list
+            .filter((item) => !item.complete)
+            .sort(
+              (a, b) =>
+                a[settings.state.defaultSortField] -
+                b[settings.state.defaultSortField]
+            ),
+          settings.state.numberOfItems,
+          settings.state.display
+        )}
+      </div>
     </div>
   );
 }
 
 export default List;
-// * list = 100 items
-// * pag = 10 items
-// * current page = 1 = 10 items
-// * slice(0, 10)

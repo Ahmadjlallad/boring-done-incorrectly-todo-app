@@ -14,12 +14,13 @@ import {
 const ToDo = () => {
   const [list, setList] = useState([]);
   const [incomplete, setIncomplete] = useState([]);
+  const [range, setRange] = useState(3);
   const { handleChange, handleSubmit } = useForm(addItem);
 
   function addItem(item) {
-    console.log(item);
     item.id = uuid() + new Date().getTime();
     item.complete = false;
+    item.difficulty = item.difficulty ? item.difficulty : range;
     setList([...list, item]);
   }
 
@@ -100,12 +101,16 @@ const ToDo = () => {
               FormGroupInfo="(required)"
             >
               <InputGroup
-                onChange={handleChange}
-                defaultValue={3}
+                onChange={(e) => {
+                  setRange(e.target.value);
+                  handleChange(e);
+                }}
+                value={range}
                 type="range"
                 min={1}
                 max={5}
                 name="difficulty"
+                placeholder="Difficulty"
               />
             </FormGroup>
 
