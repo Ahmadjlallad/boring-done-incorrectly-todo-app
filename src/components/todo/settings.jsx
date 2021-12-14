@@ -55,7 +55,6 @@ function Settings() {
             </Form.Group>
             <Form.Group controlId="display">
               <Form.ControlLabel>display complete To Do: </Form.ControlLabel>
-
               <Toggle
                 onChange={(e) => {
                   dispatch({ type: "display", payload: e });
@@ -86,6 +85,7 @@ function Settings() {
             </Form.Group>
           </Form>
         </FlexboxGrid.Item>
+
         <FlexboxGrid.Item colspan={6}>
           <Panel header="your settings" bordered>
             <List size="sm">
