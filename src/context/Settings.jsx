@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from "react";
 export const settingContext = React.createContext();
-const settings = {
+export const settings = {
   display: true,
   numberOfItems: 2,
   defaultSortField: "id",

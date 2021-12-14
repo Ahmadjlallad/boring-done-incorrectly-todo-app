@@ -17,6 +17,7 @@ function List({ list, toggleComplete, setIncomplete, incomplete }) {
           minHeight: "40%",
           margin: "0.5rem",
         }}
+        aria-label={`${item.text}`}
       >
         <div
           onClick={() => toggleComplete(item.id)}
