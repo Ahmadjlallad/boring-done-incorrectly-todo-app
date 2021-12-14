@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import SettingsContext, { settingContext } from "../context/Settings";
+import SettingsContext from "../context/Settings";
 import Settings from "../components/todo/settings.jsx";
 
 const customRender = (ui) => {

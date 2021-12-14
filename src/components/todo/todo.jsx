@@ -2,14 +2,10 @@ import React, { useState } from "react";
 import useForm from "../../hooks/form.js";
 import "./todo.scss";
 import { v4 as uuid } from "uuid";
-import List from "./List";
-import {
-  Alignment,
-  Button,
-  FormGroup,
-  InputGroup,
-  Navbar,
-} from "@blueprintjs/core";
+import List from "./todo-component/List";
+import { Alignment, Navbar } from "@blueprintjs/core";
+import TodoForm from "./todo-component/TodoForm.jsx";
+import Auth from "../auth/Auth.jsx";
 
 const ToDo = () => {
   const [list, setList] = useState([]);
@@ -39,7 +35,12 @@ const ToDo = () => {
 
     setList(items);
   }
-
+  const todoFormProps = {
+    handleChange,
+    handleSubmit,
+    range,
+    setRange,
+  };
   return (
     <>
       <Navbar
@@ -61,64 +62,9 @@ const ToDo = () => {
       </Navbar>
       <div className="todo-container">
         <div className="todo-form">
-          <form onSubmit={handleSubmit} aria-label="todo-form">
-            <h2>Add To Do Item</h2>
-
-            <FormGroup
-              helperText="To Do Item details..."
-              FormGroup="To Do Item"
-              FormGroupFor="ToDoItem"
-              FormGroupInfo="(required)"
-            >
-              <span>To Do Item</span>
-              <InputGroup
-                id="ToDoItem"
-                onChange={handleChange}
-                name="text"
-                type="text"
-                placeholder="Item Details"
-                aria-label="text"
-              />
-            </FormGroup>
-
-            <FormGroup
-              helperText="Assigned To"
-              FormGroup="Assigned To"
-              FormGroupFor="Assigned To"
-              FormGroupInfo="(required)"
-            >
-              <InputGroup
-                onChange={handleChange}
-                name="assignee"
-                type="text"
-                placeholder="Assignee Name"
-                aria-label="assignee"
-              />
-            </FormGroup>
-
-            <FormGroup
-              helperText="Difficulty"
-              FormGroup="Difficulty"
-              FormGroupFor="Difficulty"
-              FormGroupInfo="(required)"
-            >
-              <InputGroup
-                onChange={(e) => {
-                  setRange(e.target.value);
-                  handleChange(e);
-                }}
-                value={range}
-                type="range"
-                min={1}
-                max={5}
-                name="difficulty"
-                placeholder="Difficulty"
-                aria-label="range"
-              />
-            </FormGroup>
-
-            <Button type="submit">Add Item</Button>
-          </form>
+          <Auth capability="create">
+            <TodoForm {...todoFormProps} />
+          </Auth>
         </div>
         <div className="todo-list">
           <List
@@ -126,6 +72,7 @@ const ToDo = () => {
             toggleComplete={toggleComplete}
             setIncomplete={setIncomplete}
             incomplete={incomplete}
+            deleteItem={deleteItem}
           />
         </div>
       </div>

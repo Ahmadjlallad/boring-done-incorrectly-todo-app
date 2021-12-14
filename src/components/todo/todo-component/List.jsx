@@ -1,9 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
-import { settingContext } from "../../context/Settings";
+import { settingContext } from "../../../context/Settings";
 import { Button, Card, Elevation } from "@blueprintjs/core";
-
-function List({ list, toggleComplete, setIncomplete, incomplete }) {
+import { authContext } from "../../../context/AuthContext";
+import "rsuite/dist/rsuite.min.css";
+import Auth from "../../auth/Auth";
+import { If, Else } from "react-if";
+function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
   const settings = useContext(settingContext);
+  const auth = useContext(authContext);
   const [pagination, setPagination] = useState(settings.state.numberOfItems);
   const renderList = (item) => {
     return (
@@ -19,17 +23,41 @@ function List({ list, toggleComplete, setIncomplete, incomplete }) {
         }}
         aria-label={`${item.text}`}
       >
-        <div
-          onClick={() => toggleComplete(item.id)}
-          className={`${item.complete ? "Complete" : "notComplete"} isComplete`}
-        >
-          <span>{item.complete ? "Complete" : "pending"}</span>
-        </div>
+        <If condition={auth.can(auth.user, "update")}>
+          <div
+            onClick={() => toggleComplete(item.id)}
+            className={`${
+              item.complete ? "Complete" : "notComplete"
+            } isComplete`}
+          >
+            <span>{item.complete ? "Complete" : "pending"}</span>
+          </div>
+          <Else>
+            <Button
+              disabled
+              className={`${
+                item.complete ? "Complete" : "notComplete"
+              } isComplete`}
+            >
+              <span>{item.complete ? "Complete" : "pending"}</span>
+            </Button>
+          </Else>
+        </If>
+
         <p className={"assignee"}>{item.assignee}</p>
         <p className={"task"}>{item.text}</p>
         <p className="Difficulty">
           <small>Difficulty: {item.difficulty}</small>
         </p>
+        <Auth capability="delete">
+          <Button
+            color="red"
+            appearance="primary"
+            onClick={() => deleteItem(item.id)}
+          >
+            Delete
+          </Button>
+        </Auth>
       </Card>
     );
   };
@@ -84,15 +112,13 @@ function List({ list, toggleComplete, setIncomplete, incomplete }) {
             .map((item) => renderList(item))}
       <div>
         {makePagination(
-          list
-            .filter((item) => !item.complete)
-            .sort(
-              (a, b) =>
-                a[settings.state.defaultSortField] -
-                b[settings.state.defaultSortField]
-            ),
+          list.sort(
+            (a, b) =>
+              a[settings.state.defaultSortField] -
+              b[settings.state.defaultSortField]
+          ),
           settings.state.numberOfItems,
-          settings.state.display
+          !settings.state.display
         )}
       </div>
     </div>
