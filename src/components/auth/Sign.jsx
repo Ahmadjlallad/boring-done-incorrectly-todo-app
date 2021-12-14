@@ -20,6 +20,10 @@ const SigIn = ({ createNewUser }) => {
   };
   return (
     <>
+      <When condition={context.loggedIn}>
+        <Button onClick={context.logout}>Log Out</Button>
+      </When>
+
       <When condition={!context.loggedIn}>
         <Panel style={{ ...styles }}>
           <Form onSubmit={handleSubmit}>
