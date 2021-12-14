@@ -61,7 +61,7 @@ const ToDo = () => {
       </Navbar>
       <div className="todo-container">
         <div className="todo-form">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} aria-label="todo-form">
             <h2>Add To Do Item</h2>
 
             <FormGroup
@@ -77,6 +77,7 @@ const ToDo = () => {
                 name="text"
                 type="text"
                 placeholder="Item Details"
+                aria-label="text"
               />
             </FormGroup>
 
@@ -91,6 +92,7 @@ const ToDo = () => {
                 name="assignee"
                 type="text"
                 placeholder="Assignee Name"
+                aria-label="assignee"
               />
             </FormGroup>
 
@@ -111,6 +113,7 @@ const ToDo = () => {
                 max={5}
                 name="difficulty"
                 placeholder="Difficulty"
+                aria-label="range"
               />
             </FormGroup>
 

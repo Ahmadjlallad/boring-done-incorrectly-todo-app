@@ -8,7 +8,7 @@ import {
   Slider,
   Toggle,
 } from "rsuite";
-import { settingContext } from "../../context/Settings";
+import { settingContext, settings } from "../../context/Settings";
 import "rsuite/dist/rsuite.min.css";
 const data = [
   {
@@ -50,7 +50,7 @@ function Settings() {
                 onChange={(e) => {
                   dispatch({ type: "defaultSortField", payload: e });
                 }}
-                value={state.defaultSortField}
+                value={state.defaultSortField || settings.defaultSortField}
               />
             </Form.Group>
             <Form.Group controlId="display">
@@ -62,12 +62,13 @@ function Settings() {
                 }}
                 name={"display"}
                 checked={state.display}
-                value={state.display}
+                value={state.display || settings.display}
               />
             </Form.Group>
             <Form.Group controlId="slider">
               <Form.ControlLabel>show Item: </Form.ControlLabel>
               <Slider
+                data-testid="slider"
                 min={1}
                 step={1}
                 max={10}
@@ -76,7 +77,7 @@ function Settings() {
                 renderMark={(mark) => {
                   return mark;
                 }}
-                value={state.numberOfItems}
+                value={state.numberOfItems || settings.numberOfItems}
                 onChange={(e) => {
                   dispatch({ type: "numberOfItems", payload: e });
                 }}
