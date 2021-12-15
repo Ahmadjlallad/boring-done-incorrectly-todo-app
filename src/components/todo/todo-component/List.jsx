@@ -2,9 +2,10 @@ import React, { useContext, useEffect, useState } from "react";
 import { settingContext } from "../../../context/Settings";
 import { Button, Card, Elevation } from "@blueprintjs/core";
 import { authContext } from "../../../context/AuthContext";
+import todoApi from "../../../api/todoApi";
 import "rsuite/dist/rsuite.min.css";
 import Auth from "../../auth/Auth";
-import { If, Else } from "react-if";
+import { If, Else, Then } from "react-if";
 function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
   const settings = useContext(settingContext);
   const auth = useContext(authContext);
@@ -24,14 +25,21 @@ function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
         aria-label={`${item.text}`}
       >
         <If condition={auth.can(auth.user, "update")}>
-          <div
-            onClick={() => toggleComplete(item.id)}
-            className={`${
-              item.complete ? "Complete" : "notComplete"
-            } isComplete`}
-          >
-            <span>{item.complete ? "Complete" : "pending"}</span>
-          </div>
+          <Then>
+            <div
+              onClick={async () => {
+                await todoApi.update("/todo/" + item.id, {
+                  complete: true,
+                });
+                toggleComplete(item.id);
+              }}
+              className={`${
+                item.complete ? "Complete" : "notComplete"
+              } isComplete`}
+            >
+              <span>{item.complete ? "Complete" : "pending"}</span>
+            </div>
+          </Then>
           <Else>
             <Button
               disabled

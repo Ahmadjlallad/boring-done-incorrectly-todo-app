@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useForm from "../../hooks/form.js";
 import "./todo.scss";
 import { v4 as uuid } from "uuid";
@@ -6,6 +6,8 @@ import List from "./todo-component/List";
 import { Alignment, Navbar } from "@blueprintjs/core";
 import TodoForm from "./todo-component/TodoForm.jsx";
 import Auth from "../auth/Auth.jsx";
+import todoApi from "../../api/todoApi.js";
+import { authContext as ac } from "../../context/AuthContext.jsx";
 
 const ToDo = () => {
   const [list, setList] = useState([]);
@@ -13,10 +15,11 @@ const ToDo = () => {
   const [range, setRange] = useState(3);
   const { handleChange, handleSubmit } = useForm(addItem);
 
-  function addItem(item) {
+  async function addItem(item) {
     item.id = uuid() + new Date().getTime();
     item.complete = false;
     item.difficulty = item.difficulty ? item.difficulty : range;
+    await todoApi.post("/todo", item);
     setList([...list, item]);
   }
 
@@ -41,6 +44,27 @@ const ToDo = () => {
     range,
     setRange,
   };
+  const authContext = React.useContext(ac);
+  useEffect(() => {
+    (async () => {
+      console.log(authContext.token);
+      try {
+        const listItem = await todoApi.get(
+          "/todo",
+          {},
+          {
+            Headers: {
+              Authorization: `bearer ${authContext.token}`,
+            },
+          }
+        );
+        console.log(listItem);
+        setList(listItem);
+      } catch (err) {
+        console.log(err);
+      }
+    })();
+  }, []);
   return (
     <>
       <Navbar

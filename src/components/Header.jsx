@@ -1,12 +1,12 @@
 import { Alignment, Navbar } from "@blueprintjs/core";
 import React from "react";
-import { Else, If } from "react-if";
+import { Else, If, Then } from "react-if";
 import { Link } from "react-router-dom";
 import Login from "./auth/Login";
 import Sign from "./auth/Sign";
 
 function Header() {
-  const [newUser, createNewUser] = React.useState(false);
+  const [newUser, createNewUser] = React.useState(true);
   return (
     <Navbar
       className="bp3-navbar"
@@ -34,7 +34,9 @@ function Header() {
         style={{ color: "#fff", alignItems: "baseline" }}
       >
         <If condition={newUser}>
-          <Login createNewUser={createNewUser} />
+          <Then>
+            <Login createNewUser={createNewUser} />
+          </Then>
           <Else>
             <Sign createNewUser={createNewUser} />
           </Else>
