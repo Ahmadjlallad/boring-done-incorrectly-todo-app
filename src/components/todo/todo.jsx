@@ -6,7 +6,7 @@ import List from "./todo-component/List";
 import { Alignment, Navbar } from "@blueprintjs/core";
 import TodoForm from "./todo-component/TodoForm.jsx";
 import Auth from "../auth/Auth.jsx";
-import todoApi from "../../api/todoApi.js";
+import { todoApiWithToken } from "../../api/todoApi.js";
 import { authContext as ac } from "../../context/AuthContext.jsx";
 
 const ToDo = () => {
@@ -14,13 +14,18 @@ const ToDo = () => {
   const [incomplete, setIncomplete] = useState([]);
   const [range, setRange] = useState(3);
   const { handleChange, handleSubmit } = useForm(addItem);
+  const authContext = React.useContext(ac); // Todo - useContext is deprecated
 
   async function addItem(item) {
-    item.id = uuid() + new Date().getTime();
-    item.complete = false;
-    item.difficulty = item.difficulty ? item.difficulty : range;
-    await todoApi.post("/todo", item);
-    setList([...list, item]);
+    try {
+      item.id = uuid() + new Date().getTime();
+      item.complete = false;
+      item.difficulty = item.difficulty ? item.difficulty : range;
+      await todoApiWithToken.post("/todo", item, {});
+      setList([...list, item]);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   function deleteItem(id) {
@@ -44,22 +49,11 @@ const ToDo = () => {
     range,
     setRange,
   };
-  const authContext = React.useContext(ac);
   useEffect(() => {
     (async () => {
-      console.log(authContext.token);
       try {
-        const listItem = await todoApi.get(
-          "/todo",
-          {},
-          {
-            Headers: {
-              Authorization: `bearer ${authContext.token}`,
-            },
-          }
-        );
-        console.log(listItem);
-        setList(listItem);
+        const listItem = await todoApiWithToken.get("/todo");
+        setList(listItem.data);
       } catch (err) {
         console.log(err);
       }
