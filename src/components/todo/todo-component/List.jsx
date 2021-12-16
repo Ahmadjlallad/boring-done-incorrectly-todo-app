@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import { settingContext } from "../../../context/Settings";
-import { Button, Card, Elevation } from "@blueprintjs/core";
+import { Card, Elevation } from "@blueprintjs/core";
+
 import { authContext } from "../../../context/AuthContext";
-import todoApi from "../../../api/todoApi";
+import { todoApiWithToken } from "../../../api/todoApi";
 import "rsuite/dist/rsuite.min.css";
 import Auth from "../../auth/Auth";
 import { If, Else, Then } from "react-if";
+import { Button } from "rsuite";
 function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
   const settings = useContext(settingContext);
   const auth = useContext(authContext);
@@ -26,10 +28,10 @@ function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
       >
         <If condition={auth.can(auth.user, "update")}>
           <Then>
-            <div
+            <Button
               onClick={async () => {
-                await todoApi.update("/todo/" + item.id, {
-                  complete: true,
+                await todoApiWithToken.put("/todo/" + item.id, {
+                  complete: !item.complete,
                 });
                 toggleComplete(item.id);
               }}
@@ -38,7 +40,7 @@ function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
               } isComplete`}
             >
               <span>{item.complete ? "Complete" : "pending"}</span>
-            </div>
+            </Button>
           </Then>
           <Else>
             <Button
@@ -61,7 +63,10 @@ function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
           <Button
             color="red"
             appearance="primary"
-            onClick={() => deleteItem(item.id)}
+            onClick={async () => {
+              deleteItem(item.id);
+              await todoApiWithToken.delete("/todo/" + item.id);
+            }}
           >
             Delete
           </Button>
@@ -77,6 +82,8 @@ function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
     for (let i = 0; i < arr.length / number; i++) {
       btn.push(
         <Button
+          color="green"
+          appearance={`${pagination / number === i + 1 ? "primary" : "subtle"}`}
           key={i}
           onClick={() => {
             setPagination((i + 1) * number);
@@ -88,6 +95,31 @@ function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
     }
     return btn;
   };
+  function makeListArray(list, settings) {
+    let arr = [];
+    if (settings.state.display) {
+      arr = list
+        .sort(
+          (a, b) =>
+            a[settings.state.defaultSortField] -
+            b[settings.state.defaultSortField]
+        )
+        .slice(pagination - settings.state.numberOfItems, pagination)
+        .map((item) => renderList(item));
+    } else {
+      arr = list
+        .filter((item) => !item.complete)
+        .sort(
+          (a, b) =>
+            a[settings.state.defaultSortField] -
+            b[settings.state.defaultSortField]
+        )
+        .slice(pagination - settings.state.numberOfItems, pagination)
+        .map((item) => renderList(item));
+    }
+    return arr;
+  }
+
   useEffect(() => {
     let incompleteCount = list.filter((item) => !item.complete);
     setIncomplete(incompleteCount.length);
@@ -98,26 +130,16 @@ function List({ list, toggleComplete, setIncomplete, incomplete, deleteItem }) {
     setPagination(settings.state.numberOfItems);
   }, [settings.state.numberOfItems]);
 
+  const arr = makeListArray(list, settings);
+  useEffect(() => {
+    if (arr.length === 0 && pagination > settings.state.numberOfItems) {
+      setPagination(pagination - settings.state.numberOfItems);
+    }
+  }, [arr.length]);
   return (
     <div>
-      {settings.state.display
-        ? list
-            .sort(
-              (a, b) =>
-                a[settings.state.defaultSortField] -
-                b[settings.state.defaultSortField]
-            )
-            .slice(pagination - settings.state.numberOfItems, pagination)
-            .map((item) => renderList(item))
-        : list
-            .filter((item) => !item.complete)
-            .sort(
-              (a, b) =>
-                a[settings.state.defaultSortField] -
-                b[settings.state.defaultSortField]
-            )
-            .slice(pagination - settings.state.numberOfItems, pagination)
-            .map((item) => renderList(item))}
+      {arr}
+      {/* {setPagination(arr.length ===  ) } */}
       <div>
         {makePagination(
           list.sort(

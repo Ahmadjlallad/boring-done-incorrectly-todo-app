@@ -9,7 +9,6 @@ const Auth = (props) => {
   const canDo = props.capability
     ? context.can(context.user, props.capability)
     : true;
-  console.log(context);
   const okToRender = isLoggedIn && canDo;
   return <When condition={okToRender}>{props.children}</When>;
 };

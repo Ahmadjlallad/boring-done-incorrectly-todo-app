@@ -6,27 +6,6 @@ import todoApi from "../api/todoApi";
 export const authContext = createContext();
 import { Base64 } from "js-base64";
 
-const testUsers = {
-  admin: {
-    password: "password",
-    name: "Administrator",
-    role: "admin",
-    capabilities: ["create", "read", "update", "delete"],
-  },
-  editor: {
-    password: "password",
-    name: "Editor",
-    role: "editor",
-    capabilities: ["read", "update"],
-  },
-  writer: {
-    password: "password",
-    name: "Writer",
-    role: "writer",
-    capabilities: ["create", "read"],
-  },
-};
-
 const AuthComponents = (props) => {
   const [state, setState] = React.useState({
     loggedIn: false,
@@ -41,7 +20,6 @@ const AuthComponents = (props) => {
   }
 
   async function login(username, password) {
-    console.log(username, password);
     try {
       const myToken = await todoApi.post(
         "/sign-in",
@@ -52,7 +30,7 @@ const AuthComponents = (props) => {
           },
         }
       );
-      console.log(myToken.data);
+
       validateToken(myToken.data.token);
     } catch (error) {
       console.log(error);
@@ -65,17 +43,16 @@ const AuthComponents = (props) => {
 
   function validateToken(token) {
     try {
-      console.log(token);
       let user = jwt.verify(token, process.env.REACT_APP_SECRET);
-      console.log(user);
+
       setLoginState(true, token, user);
     } catch (e) {
       setLoginState(false, null, {});
       console.log("Token Validation Error", e);
     }
   }
+
   async function sigIn(username, password, email, role) {
-    console.log(username, password, email, role);
     try {
       const newUser = await todoApi.post("/sign-up", {
         username,
@@ -83,7 +60,7 @@ const AuthComponents = (props) => {
         email,
         role,
       });
-      console.log(newUser);
+
       validateToken(newUser.data.token);
     } catch (error) {
       console.log(error);
